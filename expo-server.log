@@ -1,0 +1,14 @@
+Starting project at C:\Users\Guilherme Silva\Desktop\Projetos\Clube_do_gole\Clube_do_gole Mobile\mobile
+Starting Metro Bundler
+Tunnel connected.
+Tunnel ready.
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS .\index.js ▓▓▓▓▓▓▓░░░░░░░░░ 47.8% (153/302)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.8% (897/898)
+iOS Bundled 9093ms index.js (971 modules)
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 96ms index.js (1 module)
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 237ms index.js (1 module)
