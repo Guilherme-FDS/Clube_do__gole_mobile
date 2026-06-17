@@ -1,65 +1,124 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native'
+import {
+  View, Text, ScrollView, StyleSheet, TouchableOpacity,
+  Alert, ActivityIndicator, Linking,
+} from 'react-native'
 import { colors, spacing, radius, shadow } from '../theme'
 import BotaoDourado from '../components/BotaoDourado'
 import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
-import { formatarMoeda } from '../utils/format'
 
-const PLANOS = [
-  {
-    id: 'mensal', nome: 'Mensal', meses: 1, desconto: 0,
-    badge: 'MAIS POPULAR', badgeRoxo: false,
-    beneficios: ['Flexibilidade total', 'Renovação mensal', 'Sem compromisso'],
-  },
-  {
-    id: 'semestral', nome: 'Semestral', meses: 6, desconto: 0.05,
-    badge: 'ECONOMIZE 5%', badgeRoxo: true,
-    beneficios: ['5% de desconto', '6 meses de acesso', 'Custo-benefício superior'],
-  },
-  {
-    id: 'anual', nome: 'Anual', meses: 12, desconto: 0.10,
-    badge: 'MELHOR OFERTA', badgeRoxo: true,
-    beneficios: ['10% de desconto', '12 meses de acesso', 'Maior economia'],
-  },
-]
+const LABEL_RECORRENCIA = {
+  mensal: 'Mensal',
+  semestral: 'Semestral',
+  anual: 'Anual',
+}
+
+const BADGE_RECORRENCIA = {
+  mensal: { texto: 'MAIS POPULAR', roxo: false },
+  semestral: { texto: 'ECONOMIZE 5%', roxo: true },
+  anual: { texto: 'MELHOR OFERTA', roxo: true },
+}
+
+const BENEFICIOS = {
+  mensal: ['Flexibilidade total', 'Renovação mensal', 'Sem compromisso'],
+  semestral: ['5% de desconto', '6 meses de acesso', 'Custo-benefício superior'],
+  anual: ['10% de desconto', '12 meses de acesso', 'Maior economia'],
+}
+
+function moeda(valor) {
+  return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
 
 export default function AssinaturaScreen({ navigation }) {
   const { user } = useAuth()
   const [produto, setProduto] = useState(null)
-  const [selecionado, setSelecionado] = useState('mensal')
-  const [enviando, setEnviando] = useState(false)
+  const [planos, setPlanos] = useState([])
+  const [selecionado, setSelecionado] = useState(null)
+  const [carregando, setCarregando] = useState(true)
+  const [assinando, setAssinando] = useState(false)
 
-  useEffect(() => {
-    api.get('/produtos/').then(({ data }) => {
-      if (data?.length) setProduto(data[0])
-    }).catch(() => {})
-  }, [])
+  useEffect(() => { carregar() }, [])
 
-  const precoBase = Number(produto?.preco ?? 649)
-
-  function precoPlano(plano) {
-    return precoBase * plano.meses * (1 - plano.desconto)
-  }
-
-  function precoMensal(plano) {
-    return precoBase * (1 - plano.desconto)
+  async function carregar() {
+    setCarregando(true)
+    try {
+      const { data: lista } = await api.get('/produtos/')
+      if (!lista?.length) return
+      const prod = lista[0]
+      setProduto(prod)
+      const { data: planosData } = await api.get(`/produtos/${prod.id}/planos`)
+      const ativos = planosData.filter(p => p.ativo)
+      setPlanos(ativos)
+      const mensal = ativos.find(p => p.recorrencia === 'mensal')
+      setSelecionado(mensal?.id ?? ativos[0]?.id ?? null)
+    } catch {
+      Alert.alert('Erro', 'Não foi possível carregar os planos. Verifique sua conexão.')
+    } finally {
+      setCarregando(false)
+    }
   }
 
   async function assinar() {
     if (!user) { navigation.navigate('Login'); return }
-    if (!produto) { Alert.alert('Aguarde', 'Carregando informações da box...'); return }
-    setEnviando(true)
+    if (!selecionado || !produto) return
+    setAssinando(true)
     try {
-      await api.post('/carrinho/adicionar', { produto_id: produto.id, plano: selecionado, quantidade: 1 })
-      Alert.alert('Adicionado! 🥂', 'Sua assinatura foi adicionada ao carrinho. Finalize a compra pelo site para concluir o pagamento.')
-    } catch {
-      Alert.alert('Ops', 'Não foi possível adicionar. Tente novamente.')
-    } finally { setEnviando(false) }
+      // 1. Adicionar ao carrinho
+      await api.post('/carrinho/adicionar', {
+        produto_id: produto.id,
+        plano_id: selecionado,
+        quantidade: 1,
+      })
+
+      // 2. Buscar itens do carrinho para obter os IDs
+      const { data: carrinho } = await api.get('/carrinho/')
+      const ids = carrinho.itens.map(i => i.id)
+      if (!ids.length) throw new Error('Carrinho vazio após adicionar.')
+
+      // 3. Finalizar e obter URL do MercadoPago
+      const { data } = await api.post('/carrinho/finalizar', {
+        ids,
+        cupom: null,
+        desconto_cupom: 0,
+      })
+
+      if (data.checkout_url) {
+        await Linking.openURL(data.checkout_url)
+        Alert.alert(
+          'Pagamento iniciado 🥂',
+          'Complete o pagamento no MercadoPago. Sua assinatura será ativada automaticamente assim que confirmado.',
+          [{ text: 'OK' }]
+        )
+      } else {
+        // Modo desenvolvimento — aprovação imediata
+        Alert.alert('Assinatura ativada! 🥂', 'Bem-vindo ao Clube do Gole!')
+        navigation.navigate('Perfil')
+      }
+    } catch (e) {
+      const detail = e?.response?.data?.detail
+      const msg = Array.isArray(detail)
+        ? detail.map(d => d.msg || d).join('\n')
+        : (detail || 'Não foi possível processar. Tente novamente.')
+      Alert.alert('Ops', String(msg))
+    } finally {
+      setAssinando(false)
+    }
   }
+
+  if (carregando) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color={colors.dourado} />
+      </View>
+    )
+  }
+
+  const planoAtivo = planos.find(p => p.id === selecionado)
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.lg }}>
+
       <View style={styles.badgePill}>
         <Text style={styles.badgePillText}>● NOSSA ASSINATURA</Text>
       </View>
@@ -67,11 +126,17 @@ export default function AssinaturaScreen({ navigation }) {
         Escolha seu <Text style={styles.dourado}>plano</Text>
       </Text>
       <Text style={styles.sub}>
-        Uma box premium de {formatarMoeda(precoBase)}/mês. Economize nos planos longos.
+        Duas garrafas premium por mês. Curadoria especializada entregue na sua porta.
       </Text>
 
-      {PLANOS.map((plano) => {
+      {planos.map((plano) => {
         const ativo = selecionado === plano.id
+        const badge = BADGE_RECORRENCIA[plano.recorrencia] ?? { texto: '', roxo: false }
+        const beneficios = BENEFICIOS[plano.recorrencia] ?? []
+        const precoMensal = plano.recorrencia === 'mensal'
+          ? Number(plano.preco_total)
+          : Number(plano.preco_total) / (plano.recorrencia === 'semestral' ? 6 : 12)
+
         return (
           <TouchableOpacity
             key={plano.id}
@@ -80,49 +145,64 @@ export default function AssinaturaScreen({ navigation }) {
             activeOpacity={0.85}
           >
             <View style={styles.cardHeader}>
-              <Text style={styles.cardNome}>{plano.nome}</Text>
-              <View style={[styles.cardBadge, plano.badgeRoxo && styles.cardBadgeRoxo]}>
-                <Text style={styles.cardBadgeText}>{plano.badge}</Text>
-              </View>
+              <Text style={styles.cardNome}>{LABEL_RECORRENCIA[plano.recorrencia] ?? plano.recorrencia}</Text>
+              {badge.texto ? (
+                <View style={[styles.cardBadge, badge.roxo && styles.cardBadgeRoxo]}>
+                  <Text style={styles.cardBadgeText}>{badge.texto}</Text>
+                </View>
+              ) : null}
             </View>
+
             <Text style={styles.cardPreco}>
-              {formatarMoeda(precoPlano(plano))}
+              {moeda(plano.preco_total)}
               <Text style={styles.cardPeriodo}>
-                {plano.meses === 1 ? '/mês' : plano.meses === 6 ? '/semestre' : '/ano'}
+                {plano.recorrencia === 'mensal' ? '/mês' : plano.recorrencia === 'semestral' ? '/semestre' : '/ano'}
               </Text>
             </Text>
-            {plano.meses > 1 && (
-              <Text style={styles.cardMensal}>
-                {formatarMoeda(precoMensal(plano))}/mês por membro
-              </Text>
+
+            {plano.recorrencia !== 'mensal' && (
+              <Text style={styles.cardMensal}>{moeda(precoMensal)}/mês por membro</Text>
             )}
-            {plano.desconto > 0 && (
-              <Text style={styles.economia}>
-                ✓ Economize {formatarMoeda(precoBase * plano.meses * plano.desconto)}
-              </Text>
+
+            {Number(plano.economia) > 0 && (
+              <Text style={styles.economia}>✓ Você economiza {moeda(plano.economia)}</Text>
             )}
+
             <View style={styles.beneficioWrap}>
-              {plano.beneficios.map((b) => (
+              {beneficios.map(b => (
                 <Text key={b} style={styles.beneficio}>· {b}</Text>
               ))}
             </View>
-            {ativo && <View style={styles.selecionadoIndicador} />}
+
+            {ativo && <View style={styles.indicador} />}
           </TouchableOpacity>
         )
       })}
 
+      {planos.length === 0 && (
+        <View style={[styles.card, shadow.card]}>
+          <Text style={styles.sub}>Nenhum plano disponível no momento.</Text>
+        </View>
+      )}
+
       <BotaoDourado
         title={user ? 'Assinar agora' : 'Entrar para assinar'}
         onPress={assinar}
-        loading={enviando}
-        style={{ marginTop: spacing.sm, marginBottom: spacing.xl }}
+        loading={assinando}
+        style={{ marginTop: spacing.sm, marginBottom: spacing.xs }}
       />
+
+      <Text style={styles.rodape}>
+        Você será redirecionado ao MercadoPago para concluir o pagamento com segurança.
+      </Text>
+
     </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.fundo },
+  loading: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.fundo },
   badgePill: {
     alignSelf: 'flex-start', borderWidth: 1, borderColor: colors.roxo,
     borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 4, marginBottom: spacing.sm,
@@ -132,22 +212,14 @@ const styles = StyleSheet.create({
   dourado: { color: colors.dourado },
   sub: { color: colors.textoSecundario, fontSize: 14, marginTop: 6, marginBottom: spacing.md, lineHeight: 21 },
   card: {
-    backgroundColor: colors.fundoSecundario,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    borderWidth: 1.5,
-    borderColor: colors.bordaCard,
-    marginBottom: spacing.sm,
-    overflow: 'hidden',
+    backgroundColor: colors.fundoSecundario, borderRadius: radius.lg, padding: spacing.md,
+    borderWidth: 1.5, borderColor: colors.bordaCard, marginBottom: spacing.sm, overflow: 'hidden',
   },
   cardAtivo: { borderColor: colors.dourado },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardNome: { color: colors.texto, fontSize: 20, fontWeight: '700' },
   cardBadge: {
-    backgroundColor: colors.dourado,
-    borderRadius: radius.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    backgroundColor: colors.dourado, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 4,
   },
   cardBadgeRoxo: { backgroundColor: colors.roxo },
   cardBadgeText: { color: '#FFFFFF', fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
@@ -157,10 +229,13 @@ const styles = StyleSheet.create({
   economia: { color: colors.sucesso, fontSize: 13, fontWeight: '600', marginTop: 6 },
   beneficioWrap: { marginTop: spacing.sm, gap: 4 },
   beneficio: { color: colors.textoSecundario, fontSize: 14 },
-  selecionadoIndicador: {
-    position: 'absolute', top: 0, right: 0, bottom: 0,
-    width: 3, backgroundColor: colors.dourado,
-    borderTopRightRadius: radius.lg,
-    borderBottomRightRadius: radius.lg,
+  indicador: {
+    position: 'absolute', top: 0, right: 0, bottom: 0, width: 3,
+    backgroundColor: colors.dourado,
+    borderTopRightRadius: radius.lg, borderBottomRightRadius: radius.lg,
+  },
+  rodape: {
+    color: colors.textoTerciario, fontSize: 12, textAlign: 'center',
+    marginBottom: spacing.xl, marginTop: spacing.xs, lineHeight: 18,
   },
 })
