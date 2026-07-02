@@ -31,6 +31,8 @@ export default function LoginScreen({ navigation }) {
   const [telefone, setTelefone] = useState('')
   const [dataNasc, setDataNasc] = useState(null) // Date | null
   const [mostrarPicker, setMostrarPicker] = useState(false)
+  const [modoManualData, setModoManualData] = useState(false)
+  const [dataNascTexto, setDataNascTexto] = useState('')
   const limites = limitesNascimento()
   const [emailCad, setEmailCad] = useState('')
   const [senhaCad, setSenhaCad] = useState('')
@@ -244,23 +246,58 @@ export default function LoginScreen({ navigation }) {
                 />
               </Campo>
               <Campo label="Data de nascimento">
-                <TouchableOpacity style={styles.input} onPress={() => setMostrarPicker(!mostrarPicker)}>
-                  <Text style={{ color: dataNasc ? colors.texto : colors.textoTerciario, fontSize: 15 }}>
-                    {dataNasc ? dataParaBR(dataNasc) : 'Selecionar data'}
-                  </Text>
-                </TouchableOpacity>
-                {mostrarPicker && (
-                  <DateTimePicker
-                    value={dataNasc || limites.max}
-                    mode="date"
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    minimumDate={limites.min}
-                    maximumDate={limites.max}
-                    onChange={(event, d) => {
-                      if (Platform.OS === 'android') setMostrarPicker(false)
-                      if (d) setDataNasc(d)
-                    }}
-                  />
+                {modoManualData ? (
+                  <>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="DD/MM/AAAA"
+                      placeholderTextColor={colors.textoTerciario}
+                      value={dataNascTexto}
+                      onChangeText={(t) => {
+                        const formatado = formatarDataTexto(t)
+                        setDataNascTexto(formatado)
+                        const d = parseDataBR(formatado, limites)
+                        if (d) setDataNasc(d)
+                        else if (formatado.replace(/\D/g, '').length < 8) setDataNasc(null)
+                      }}
+                      keyboardType="numeric"
+                      maxLength={10}
+                    />
+                    {dataNascTexto.replace(/\D/g, '').length === 8 && !dataNasc && (
+                      <Text style={styles.erroCampo}>Data inválida ou fora do permitido (18–120 anos).</Text>
+                    )}
+                    <TouchableOpacity onPress={() => setModoManualData(false)} style={{ marginTop: 6 }}>
+                      <Text style={styles.linkModoData}>Usar calendário</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <>
+                    <TouchableOpacity style={styles.input} onPress={() => setMostrarPicker(!mostrarPicker)}>
+                      <Text style={{ color: dataNasc ? colors.texto : colors.textoTerciario, fontSize: 15 }}>
+                        {dataNasc ? dataParaBR(dataNasc) : 'Selecionar data'}
+                      </Text>
+                    </TouchableOpacity>
+                    {mostrarPicker && (
+                      <DateTimePicker
+                        value={dataNasc || limites.max}
+                        mode="date"
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        themeVariant="light"
+                        minimumDate={limites.min}
+                        maximumDate={limites.max}
+                        onChange={(event, d) => {
+                          if (Platform.OS === 'android') setMostrarPicker(false)
+                          if (d) setDataNasc(d)
+                        }}
+                      />
+                    )}
+                    <TouchableOpacity
+                      onPress={() => { setDataNascTexto(dataNasc ? dataParaBR(dataNasc) : ''); setModoManualData(true) }}
+                      style={{ marginTop: 6 }}
+                    >
+                      <Text style={styles.linkModoData}>Digitar manualmente</Text>
+                    </TouchableOpacity>
+                  </>
                 )}
               </Campo>
               <Campo label="E-mail">
@@ -311,6 +348,25 @@ export default function LoginScreen({ navigation }) {
       </ScrollView>
     </KeyboardAvoidingView>
   )
+}
+
+function formatarDataTexto(text) {
+  const nums = text.replace(/\D/g, '').slice(0, 8)
+  if (nums.length <= 2) return nums
+  if (nums.length <= 4) return `${nums.slice(0, 2)}/${nums.slice(2)}`
+  return `${nums.slice(0, 2)}/${nums.slice(2, 4)}/${nums.slice(4)}`
+}
+
+function parseDataBR(texto, limites) {
+  const nums = texto.replace(/\D/g, '')
+  if (nums.length !== 8) return null
+  const dia = parseInt(nums.slice(0, 2), 10)
+  const mes = parseInt(nums.slice(2, 4), 10)
+  const ano = parseInt(nums.slice(4, 8), 10)
+  const d = new Date(ano, mes - 1, dia)
+  if (d.getFullYear() !== ano || d.getMonth() !== mes - 1 || d.getDate() !== dia) return null
+  if (limites && (d < limites.min || d > limites.max)) return null
+  return d
 }
 
 function Campo({ label, children }) {
@@ -380,6 +436,7 @@ const styles = StyleSheet.create({
   trocaLink: { color: colors.dourado, fontWeight: '700' },
   voltarTexto: { color: colors.textoTerciario, fontSize: 14, textAlign: 'center' },
   erroCampo: { color: colors.erro, fontSize: 12, marginTop: 6 },
+  linkModoData: { color: colors.dourado, fontSize: 12, fontWeight: '600' },
   esqueciLink: { color: colors.dourado, fontSize: 13, fontWeight: '600', textAlign: 'right' },
   sucessoTexto: { color: colors.textoSecundario, fontSize: 14, lineHeight: 21, marginBottom: spacing.md },
   ouRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: spacing.md },
