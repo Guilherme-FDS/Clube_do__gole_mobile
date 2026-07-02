@@ -291,12 +291,6 @@ export default function LoginScreen({ navigation }) {
                         }}
                       />
                     )}
-                    <TouchableOpacity
-                      onPress={() => { setDataNascTexto(dataNasc ? dataParaBR(dataNasc) : ''); setModoManualData(true) }}
-                      style={{ marginTop: 6 }}
-                    >
-                      <Text style={styles.linkModoData}>Digitar manualmente</Text>
-                    </TouchableOpacity>
                   </>
                 )}
               </Campo>
