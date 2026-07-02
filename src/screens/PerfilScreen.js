@@ -1,22 +1,19 @@
-import React, { useEffect, useState, useCallback } from 'react'
-import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native'
+import React, { useState, useCallback } from 'react'
+import { View, Text, ScrollView, StyleSheet, Alert, TouchableOpacity } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import { colors, spacing, radius, shadow } from '../theme'
 import BotaoDourado from '../components/BotaoDourado'
 import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
-import { formatarMoeda } from '../utils/format'
 
 export default function PerfilScreen({ navigation }) {
   const { user, logout } = useAuth()
   const [assinaturas, setAssinaturas] = useState([])
-  const [pedidos, setPedidos] = useState([])
 
   useFocusEffect(
     useCallback(() => {
       if (!user) return
       api.get('/assinaturas/minhas').then(({ data }) => setAssinaturas(data || [])).catch(() => {})
-      api.get('/carrinho/meus_pedidos').then(({ data }) => setPedidos(data || [])).catch(() => {})
     }, [user])
   )
 
@@ -79,23 +76,17 @@ export default function PerfilScreen({ navigation }) {
         ))
       )}
 
-      {/* Pedidos */}
-      <Text style={styles.secao}>Meus pedidos</Text>
-      {pedidos.length === 0 ? (
-        <View style={[styles.card, shadow.card]}>
-          <Text style={styles.cardTexto}>Nenhum pedido por aqui ainda.</Text>
-        </View>
-      ) : (
-        pedidos.map((p, i) => (
-          <View key={i} style={[styles.card, shadow.card]}>
-            <View style={styles.cardHeaderRow}>
-              <Text style={styles.cardTitulo}>Pedido #{p.id ?? i + 1}</Text>
-              {p.total != null && <Text style={styles.cardPreco}>{formatarMoeda(p.total)}</Text>}
-            </View>
-            {p.status ? <Text style={styles.cardTexto}>{p.status}</Text> : null}
-          </View>
-        ))
-      )}
+      {/* Configurações */}
+      <Text style={styles.secao}>Configurações</Text>
+      <View style={[styles.card, shadow.card, { paddingVertical: 0 }]}>
+        <ItemMenu titulo="Editar perfil" onPress={() => navigation.navigate('EditarPerfil')} />
+        <Divisor />
+        <ItemMenu titulo="Meus endereços" onPress={() => navigation.navigate('Enderecos')} />
+        <Divisor />
+        <ItemMenu titulo="Segurança" onPress={() => navigation.navigate('Seguranca')} />
+        <Divisor />
+        <ItemMenu titulo="Meus pedidos" onPress={() => navigation.navigate('MeusPedidos')} ultimo />
+      </View>
 
       <BotaoDourado
         title="Sair da conta"
@@ -105,6 +96,19 @@ export default function PerfilScreen({ navigation }) {
       />
     </ScrollView>
   )
+}
+
+function ItemMenu({ titulo, onPress, ultimo }) {
+  return (
+    <TouchableOpacity onPress={onPress} style={[styles.itemMenu, ultimo && { marginBottom: 0 }]}>
+      <Text style={styles.itemMenuTexto}>{titulo}</Text>
+      <Text style={styles.itemMenuSeta}>→</Text>
+    </TouchableOpacity>
+  )
+}
+
+function Divisor() {
+  return <View style={styles.divisor} />
 }
 
 const styles = StyleSheet.create({
@@ -131,11 +135,17 @@ const styles = StyleSheet.create({
   cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardTitulo: { color: colors.texto, fontSize: 16, fontWeight: '600' },
   cardTexto: { color: colors.textoSecundario, fontSize: 14, marginTop: 4 },
-  cardPreco: { color: colors.dourado, fontSize: 15, fontWeight: '700' },
   statusBadge: {
     borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 3,
     backgroundColor: colors.fundoCard,
   },
   statusAtivo: { backgroundColor: '#e6f4ed' },
   statusText: { fontSize: 12, fontWeight: '600', color: colors.sucesso },
+  itemMenu: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingVertical: spacing.md,
+  },
+  itemMenuTexto: { color: colors.texto, fontSize: 15, fontWeight: '500' },
+  itemMenuSeta: { color: colors.dourado, fontSize: 16, fontWeight: '700' },
+  divisor: { height: 1, backgroundColor: colors.bordaCard },
 })

@@ -16,6 +16,10 @@ import LoginScreen from './src/screens/LoginScreen'
 import CarrinhoScreen from './src/screens/CarrinhoScreen'
 import CheckoutScreen from './src/screens/CheckoutScreen'
 import EnderecoFormScreen from './src/screens/EnderecoFormScreen'
+import EditarPerfilScreen from './src/screens/EditarPerfilScreen'
+import EnderecosScreen from './src/screens/EnderecosScreen'
+import SegurancaScreen from './src/screens/SegurancaScreen'
+import MeusPedidosScreen from './src/screens/MeusPedidosScreen'
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -128,6 +132,50 @@ export default function App() {
               title: 'Endereço',
               headerStyle: { backgroundColor: colors.fundoSecundario },
               headerTintColor: colors.dourado,
+              headerShadowVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="EditarPerfil"
+            component={EditarPerfilScreen}
+            options={{
+              title: 'Editar perfil',
+              headerStyle: { backgroundColor: colors.fundoSecundario },
+              headerTintColor: colors.dourado,
+              headerTitleStyle: { color: colors.texto },
+              headerShadowVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="Enderecos"
+            component={EnderecosScreen}
+            options={{
+              title: 'Meus endereços',
+              headerStyle: { backgroundColor: colors.fundoSecundario },
+              headerTintColor: colors.dourado,
+              headerTitleStyle: { color: colors.texto },
+              headerShadowVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="Seguranca"
+            component={SegurancaScreen}
+            options={{
+              title: 'Segurança',
+              headerStyle: { backgroundColor: colors.fundoSecundario },
+              headerTintColor: colors.dourado,
+              headerTitleStyle: { color: colors.texto },
+              headerShadowVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="MeusPedidos"
+            component={MeusPedidosScreen}
+            options={{
+              title: 'Meus pedidos',
+              headerStyle: { backgroundColor: colors.fundoSecundario },
+              headerTintColor: colors.dourado,
+              headerTitleStyle: { color: colors.texto },
               headerShadowVisible: false,
             }}
           />
