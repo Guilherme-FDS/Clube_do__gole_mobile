@@ -35,6 +35,15 @@ export function AuthProvider({ children }) {
     return me.data
   }
 
+  async function loginOAuth(code, provider) {
+    const { data } = await api.post('/auth/oauth/callback', { code, provider, guest_carrinho: [] })
+    const token = data.access_token || data.token
+    await AsyncStorage.setItem('token', token)
+    const me = await api.get('/auth/me')
+    setUser(me.data)
+    return me.data
+  }
+
   // cadastro espera o schema completo do backend:
   // { cpf, nome, sobrenome, data_nascimento, email, senha, telefone }
   async function cadastro(campos) {
@@ -49,7 +58,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, cadastro, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, loginOAuth, cadastro, logout }}>
       {children}
     </AuthContext.Provider>
   )
