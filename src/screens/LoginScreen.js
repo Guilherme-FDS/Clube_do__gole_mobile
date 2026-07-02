@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext'
 import { validarSenha } from '../utils/validarSenha'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { limitesNascimento, dataParaISO, dataParaBR } from '../utils/datas'
+import api from '../services/api'
 
 export default function LoginScreen({ navigation }) {
   const { login, cadastro } = useAuth()
@@ -17,6 +18,9 @@ export default function LoginScreen({ navigation }) {
 
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
+
+  const [emailRecuperacao, setEmailRecuperacao] = useState('')
+  const [linkEnviado, setLinkEnviado] = useState(false)
 
   const [nome, setNome] = useState('')
   const [sobrenome, setSobrenome] = useState('')
@@ -39,6 +43,17 @@ export default function LoginScreen({ navigation }) {
     } catch (e) {
       const msg = e?.response?.data?.detail || 'E-mail ou senha inválidos.'
       Alert.alert('Erro', String(Array.isArray(msg) ? msg[0]?.msg || JSON.stringify(msg) : msg))
+    } finally { setLoading(false) }
+  }
+
+  async function enviarLinkRecuperacao() {
+    if (!emailRecuperacao.trim()) { Alert.alert('Atenção', 'Informe o email.'); return }
+    setLoading(true)
+    try {
+      await api.post('/auth/esqueceu-senha', { email: emailRecuperacao.trim() })
+      setLinkEnviado(true)
+    } catch {
+      Alert.alert('Erro', 'Não foi possível enviar. Tente novamente.')
     } finally { setLoading(false) }
   }
 
@@ -83,16 +98,44 @@ export default function LoginScreen({ navigation }) {
               <Text style={styles.badgePillText}>✦ CLUBE DO GOLE</Text>
             </View>
             <Text style={styles.titulo}>
-              {modo === 'login' ? 'Bem-vindo de volta' : 'Criar conta'}
+              {modo === 'login' ? 'Bem-vindo de volta' : modo === 'esqueci' ? 'Recuperar senha' : 'Criar conta'}
             </Text>
             <Text style={styles.sub}>
               {modo === 'login'
                 ? 'Acesse sua conta para acompanhar sua assinatura.'
-                : 'Torne-se membro e descubra experiências exclusivas.'}
+                : modo === 'esqueci'
+                  ? 'Informe seu email e enviaremos um link de recuperação.'
+                  : 'Torne-se membro e descubra experiências exclusivas.'}
             </Text>
           </View>
 
-          {modo === 'login' ? (
+          {modo === 'esqueci' ? (
+            linkEnviado ? (
+              <>
+                <Text style={styles.sucessoTexto}>
+                  Se este email estiver cadastrado, você receberá um link de recuperação.{'\n\n'}
+                  O link abre no navegador do celular para criar a nova senha.
+                </Text>
+                <BotaoGold titulo="Voltar ao login" onPress={() => { setModo('login'); setLinkEnviado(false) }} />
+              </>
+            ) : (
+              <>
+                <Campo label="E-mail cadastrado">
+                  <TextInput
+                    style={styles.input}
+                    placeholder="seu@email.com"
+                    placeholderTextColor={colors.textoTerciario}
+                    value={emailRecuperacao}
+                    onChangeText={setEmailRecuperacao}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    autoCorrect={false}
+                  />
+                </Campo>
+                <BotaoGold titulo="Enviar link" onPress={enviarLinkRecuperacao} loading={loading} />
+              </>
+            )
+          ) : modo === 'login' ? (
             <>
               <Campo label="E-mail">
                 <TextInput
@@ -117,6 +160,9 @@ export default function LoginScreen({ navigation }) {
                 />
               </Campo>
               <BotaoGold titulo="Entrar" onPress={entrar} loading={loading} />
+              <TouchableOpacity onPress={() => setModo('esqueci')} style={{ marginTop: spacing.sm }}>
+                <Text style={styles.esqueciLink}>Esqueceu sua senha?</Text>
+              </TouchableOpacity>
             </>
           ) : (
             <>
@@ -214,14 +260,16 @@ export default function LoginScreen({ navigation }) {
 
           <View style={styles.divisor} />
 
-          <TouchableOpacity onPress={() => setModo(modo === 'login' ? 'cadastro' : 'login')}>
-            <Text style={styles.trocaTexto}>
-              {modo === 'login' ? 'Ainda não é membro? ' : 'Já tem conta? '}
-              <Text style={styles.trocaLink}>
-                {modo === 'login' ? 'Criar conta' : 'Entrar'}
+          {modo !== 'esqueci' && (
+            <TouchableOpacity onPress={() => setModo(modo === 'login' ? 'cadastro' : 'login')}>
+              <Text style={styles.trocaTexto}>
+                {modo === 'login' ? 'Ainda não é membro? ' : 'Já tem conta? '}
+                <Text style={styles.trocaLink}>
+                  {modo === 'login' ? 'Criar conta' : 'Entrar'}
+                </Text>
               </Text>
-            </Text>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: spacing.sm }}>
             <Text style={styles.voltarTexto}>← Voltar</Text>
@@ -300,4 +348,6 @@ const styles = StyleSheet.create({
   trocaLink: { color: colors.dourado, fontWeight: '700' },
   voltarTexto: { color: colors.textoTerciario, fontSize: 14, textAlign: 'center' },
   erroCampo: { color: colors.erro, fontSize: 12, marginTop: 6 },
+  esqueciLink: { color: colors.dourado, fontSize: 13, fontWeight: '600', textAlign: 'right' },
+  sucessoTexto: { color: colors.textoSecundario, fontSize: 14, lineHeight: 21, marginBottom: spacing.md },
 })
