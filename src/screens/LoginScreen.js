@@ -6,6 +6,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient'
 import { colors, gradients, spacing, radius, shadow } from '../theme'
 import { useAuth } from '../context/AuthContext'
+import { validarSenha } from '../utils/validarSenha'
 
 function formatarData(text) {
   const nums = text.replace(/\D/g, '').slice(0, 8)
@@ -36,6 +37,8 @@ export default function LoginScreen({ navigation }) {
   const [emailCad, setEmailCad] = useState('')
   const [senhaCad, setSenhaCad] = useState('')
 
+  const erroSenhaCad = senhaCad ? validarSenha(senhaCad) : null
+
   async function entrar() {
     if (!email || !senha) { Alert.alert('Atenção', 'Preencha e-mail e senha.'); return }
     setLoading(true)
@@ -53,6 +56,8 @@ export default function LoginScreen({ navigation }) {
       Alert.alert('Atenção', 'Preencha todos os campos.')
       return
     }
+    const erroSenha = validarSenha(senhaCad)
+    if (erroSenha) { Alert.alert('Atenção', erroSenha); return }
     if (dataNasc.replace(/\D/g, '').length < 8) {
       Alert.alert('Atenção', 'Informe uma data de nascimento completa.')
       return
@@ -198,12 +203,13 @@ export default function LoginScreen({ navigation }) {
               <Campo label="Senha">
                 <TextInput
                   style={styles.input}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="8+ caracteres, com maiúscula, minúscula e número"
                   placeholderTextColor={colors.textoTerciario}
                   value={senhaCad}
                   onChangeText={setSenhaCad}
                   secureTextEntry
                 />
+                {erroSenhaCad ? <Text style={styles.erroCampo}>{erroSenhaCad}</Text> : null}
               </Campo>
               <BotaoGold titulo="Criar conta" onPress={criar} loading={loading} />
             </>
@@ -296,4 +302,5 @@ const styles = StyleSheet.create({
   trocaTexto: { color: colors.textoSecundario, fontSize: 14, textAlign: 'center' },
   trocaLink: { color: colors.dourado, fontWeight: '700' },
   voltarTexto: { color: colors.textoTerciario, fontSize: 14, textAlign: 'center' },
+  erroCampo: { color: colors.erro, fontSize: 12, marginTop: 6 },
 })
