@@ -4,15 +4,18 @@ import {
   KeyboardAvoidingView, Platform, ScrollView, Alert, ActivityIndicator
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import * as WebBrowser from 'expo-web-browser'
+import * as Linking from 'expo-linking'
 import { colors, gradients, spacing, radius, shadow } from '../theme'
 import { useAuth } from '../context/AuthContext'
 import { validarSenha } from '../utils/validarSenha'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { limitesNascimento, dataParaISO, dataParaBR } from '../utils/datas'
 import api from '../services/api'
+import { buildGoogleAuthUrl, buildFacebookAuthUrl, extrairCode } from '../services/oauth'
 
 export default function LoginScreen({ navigation }) {
-  const { login, cadastro } = useAuth()
+  const { login, cadastro, loginOAuth } = useAuth()
   const [modo, setModo] = useState('login')
   const [loading, setLoading] = useState(false)
 
@@ -43,6 +46,23 @@ export default function LoginScreen({ navigation }) {
     } catch (e) {
       const msg = e?.response?.data?.detail || 'E-mail ou senha inválidos.'
       Alert.alert('Erro', String(Array.isArray(msg) ? msg[0]?.msg || JSON.stringify(msg) : msg))
+    } finally { setLoading(false) }
+  }
+
+  async function entrarSocial(provider) {
+    const returnUrl = Linking.createURL('oauth')
+    const authUrl = provider === 'google' ? buildGoogleAuthUrl(returnUrl) : buildFacebookAuthUrl(returnUrl)
+    try {
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, returnUrl)
+      if (result.type !== 'success') return // usuário cancelou — sem alert
+      const code = extrairCode(result.url)
+      if (!code) return
+      setLoading(true)
+      await loginOAuth(code, provider)
+      navigation.goBack()
+    } catch (e) {
+      const msg = e?.response?.data?.detail
+      Alert.alert('Erro', String(msg || 'Não foi possível entrar. Tente novamente.'))
     } finally { setLoading(false) }
   }
 
@@ -162,6 +182,18 @@ export default function LoginScreen({ navigation }) {
               <BotaoGold titulo="Entrar" onPress={entrar} loading={loading} />
               <TouchableOpacity onPress={() => setModo('esqueci')} style={{ marginTop: spacing.sm }}>
                 <Text style={styles.esqueciLink}>Esqueceu sua senha?</Text>
+              </TouchableOpacity>
+
+              <View style={styles.ouRow}>
+                <View style={styles.ouLinha} />
+                <Text style={styles.ouTexto}>ou</Text>
+                <View style={styles.ouLinha} />
+              </View>
+              <TouchableOpacity style={styles.socialBtn} onPress={() => entrarSocial('google')} disabled={loading}>
+                <Text style={styles.socialBtnText}>Entrar com Google</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.socialBtn} onPress={() => entrarSocial('facebook')} disabled={loading}>
+                <Text style={styles.socialBtnText}>Entrar com Facebook</Text>
               </TouchableOpacity>
             </>
           ) : (
@@ -350,4 +382,13 @@ const styles = StyleSheet.create({
   erroCampo: { color: colors.erro, fontSize: 12, marginTop: 6 },
   esqueciLink: { color: colors.dourado, fontSize: 13, fontWeight: '600', textAlign: 'right' },
   sucessoTexto: { color: colors.textoSecundario, fontSize: 14, lineHeight: 21, marginBottom: spacing.md },
+  ouRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: spacing.md },
+  ouLinha: { flex: 1, height: 1, backgroundColor: colors.bordaCard },
+  ouTexto: { color: colors.textoTerciario, fontSize: 12 },
+  socialBtn: {
+    borderWidth: 1, borderColor: colors.bordaCard, borderRadius: radius.pill,
+    paddingVertical: 14, alignItems: 'center', marginBottom: spacing.xs,
+    backgroundColor: colors.fundoCard,
+  },
+  socialBtnText: { color: colors.texto, fontSize: 15, fontWeight: '600' },
 })
