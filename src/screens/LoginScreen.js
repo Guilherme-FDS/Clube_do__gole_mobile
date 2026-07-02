@@ -7,19 +7,8 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { colors, gradients, spacing, radius, shadow } from '../theme'
 import { useAuth } from '../context/AuthContext'
 import { validarSenha } from '../utils/validarSenha'
-
-function formatarData(text) {
-  const nums = text.replace(/\D/g, '').slice(0, 8)
-  if (nums.length <= 2) return nums
-  if (nums.length <= 4) return `${nums.slice(0, 2)}/${nums.slice(2)}`
-  return `${nums.slice(0, 2)}/${nums.slice(2, 4)}/${nums.slice(4)}`
-}
-
-function dataParaApi(ddmmaaaa) {
-  const nums = ddmmaaaa.replace(/\D/g, '')
-  if (nums.length < 8) return ddmmaaaa
-  return `${nums.slice(4, 8)}-${nums.slice(2, 4)}-${nums.slice(0, 2)}`
-}
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { limitesNascimento, dataParaISO, dataParaBR } from '../utils/datas'
 
 export default function LoginScreen({ navigation }) {
   const { login, cadastro } = useAuth()
@@ -33,7 +22,9 @@ export default function LoginScreen({ navigation }) {
   const [sobrenome, setSobrenome] = useState('')
   const [cpf, setCpf] = useState('')
   const [telefone, setTelefone] = useState('')
-  const [dataNasc, setDataNasc] = useState('')
+  const [dataNasc, setDataNasc] = useState(null) // Date | null
+  const [mostrarPicker, setMostrarPicker] = useState(false)
+  const limites = limitesNascimento()
   const [emailCad, setEmailCad] = useState('')
   const [senhaCad, setSenhaCad] = useState('')
 
@@ -52,23 +43,20 @@ export default function LoginScreen({ navigation }) {
   }
 
   async function criar() {
-    if (!nome || !sobrenome || !cpf || !telefone || !dataNasc || !emailCad || !senhaCad) {
+    if (!nome || !sobrenome || !cpf || !telefone || !emailCad || !senhaCad) {
       Alert.alert('Atenção', 'Preencha todos os campos.')
       return
     }
     const erroSenha = validarSenha(senhaCad)
     if (erroSenha) { Alert.alert('Atenção', erroSenha); return }
-    if (dataNasc.replace(/\D/g, '').length < 8) {
-      Alert.alert('Atenção', 'Informe uma data de nascimento completa.')
-      return
-    }
+    if (!dataNasc) { Alert.alert('Atenção', 'Selecione sua data de nascimento.'); return }
     setLoading(true)
     try {
       await cadastro({
         nome, sobrenome,
         cpf: cpf.replace(/\D/g, ''),
         telefone: telefone.replace(/\D/g, ''),
-        data_nascimento: dataParaApi(dataNasc),
+        data_nascimento: dataParaISO(dataNasc),
         email: emailCad.trim(),
         senha: senhaCad,
       })
@@ -178,15 +166,24 @@ export default function LoginScreen({ navigation }) {
                 />
               </Campo>
               <Campo label="Data de nascimento">
-                <TextInput
-                  style={styles.input}
-                  placeholder="DD/MM/AAAA"
-                  placeholderTextColor={colors.textoTerciario}
-                  value={dataNasc}
-                  onChangeText={(t) => setDataNasc(formatarData(t))}
-                  keyboardType="numeric"
-                  maxLength={10}
-                />
+                <TouchableOpacity style={styles.input} onPress={() => setMostrarPicker(!mostrarPicker)}>
+                  <Text style={{ color: dataNasc ? colors.texto : colors.textoTerciario, fontSize: 15 }}>
+                    {dataNasc ? dataParaBR(dataNasc) : 'Selecionar data'}
+                  </Text>
+                </TouchableOpacity>
+                {mostrarPicker && (
+                  <DateTimePicker
+                    value={dataNasc || limites.max}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    minimumDate={limites.min}
+                    maximumDate={limites.max}
+                    onChange={(event, d) => {
+                      if (Platform.OS === 'android') setMostrarPicker(false)
+                      if (d) setDataNasc(d)
+                    }}
+                  />
+                )}
               </Campo>
               <Campo label="E-mail">
                 <TextInput
