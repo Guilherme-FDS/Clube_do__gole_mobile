@@ -20,6 +20,14 @@ import EditarPerfilScreen from './src/screens/EditarPerfilScreen'
 import EnderecosScreen from './src/screens/EnderecosScreen'
 import SegurancaScreen from './src/screens/SegurancaScreen'
 import MeusPedidosScreen from './src/screens/MeusPedidosScreen'
+import SobreScreen from './src/screens/SobreScreen'
+import FAQScreen from './src/screens/FAQScreen'
+import BlogScreen from './src/screens/BlogScreen'
+import BlogPostScreen from './src/screens/BlogPostScreen'
+import ContatoScreen from './src/screens/ContatoScreen'
+import CorporativoScreen from './src/screens/CorporativoScreen'
+import EnvioDevolucoesScreen from './src/screens/EnvioDevolucoesScreen'
+import PoliticaReembolsoScreen from './src/screens/PoliticaReembolsoScreen'
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -179,6 +187,14 @@ export default function App() {
               headerShadowVisible: false,
             }}
           />
+          <Stack.Screen name="Sobre" component={SobreScreen} options={{ title: 'Sobre', headerStyle: { backgroundColor: colors.fundoSecundario }, headerTintColor: colors.dourado, headerTitleStyle: { color: colors.texto }, headerShadowVisible: false }} />
+          <Stack.Screen name="FAQ" component={FAQScreen} options={{ title: 'FAQ', headerStyle: { backgroundColor: colors.fundoSecundario }, headerTintColor: colors.dourado, headerTitleStyle: { color: colors.texto }, headerShadowVisible: false }} />
+          <Stack.Screen name="Blog" component={BlogScreen} options={{ title: 'Blog', headerStyle: { backgroundColor: colors.fundoSecundario }, headerTintColor: colors.dourado, headerTitleStyle: { color: colors.texto }, headerShadowVisible: false }} />
+          <Stack.Screen name="BlogPost" component={BlogPostScreen} options={{ title: 'Post', headerStyle: { backgroundColor: colors.fundoSecundario }, headerTintColor: colors.dourado, headerTitleStyle: { color: colors.texto }, headerShadowVisible: false }} />
+          <Stack.Screen name="Contato" component={ContatoScreen} options={{ title: 'Contato', headerStyle: { backgroundColor: colors.fundoSecundario }, headerTintColor: colors.dourado, headerTitleStyle: { color: colors.texto }, headerShadowVisible: false }} />
+          <Stack.Screen name="Corporativo" component={CorporativoScreen} options={{ title: 'Corporativo', headerStyle: { backgroundColor: colors.fundoSecundario }, headerTintColor: colors.dourado, headerTitleStyle: { color: colors.texto }, headerShadowVisible: false }} />
+          <Stack.Screen name="EnvioDevolucoes" component={EnvioDevolucoesScreen} options={{ title: 'Envio e Devoluções', headerStyle: { backgroundColor: colors.fundoSecundario }, headerTintColor: colors.dourado, headerTitleStyle: { color: colors.texto }, headerShadowVisible: false }} />
+          <Stack.Screen name="PoliticaReembolso" component={PoliticaReembolsoScreen} options={{ title: 'Política de Reembolso', headerStyle: { backgroundColor: colors.fundoSecundario }, headerTintColor: colors.dourado, headerTitleStyle: { color: colors.texto }, headerShadowVisible: false }} />
         </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>

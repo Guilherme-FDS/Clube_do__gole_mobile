@@ -26,7 +26,7 @@ const DEPOIMENTOS = [
   { nome: 'Renata L.', texto: 'A curadoria é impecável. Vale cada centavo.' },
 ]
 
-export default function ComunidadeScreen() {
+export default function ComunidadeScreen({ navigation }) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.lg }}>
 
@@ -70,13 +70,64 @@ export default function ComunidadeScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.social, { marginBottom: spacing.xl }, shadow.card]}
+        style={[styles.social, shadow.card]}
         onPress={() => Linking.openURL('https://api.whatsapp.com/send/?phone=5544998969986')}
       >
         <Text style={styles.socialEmoji}>💬</Text>
         <View style={{ flex: 1 }}>
           <Text style={styles.socialTitulo}>WhatsApp</Text>
           <Text style={styles.socialSub}>Fale com a gente</Text>
+        </View>
+        <Text style={styles.socialArrow}>→</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.secao}>Institucional</Text>
+      <TouchableOpacity style={[styles.social, shadow.card]} onPress={() => navigation.navigate('Sobre')}>
+        <Text style={styles.socialEmoji}>🥂</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.socialTitulo}>Sobre o Clube</Text>
+        </View>
+        <Text style={styles.socialArrow}>→</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.social, shadow.card]} onPress={() => navigation.navigate('FAQ')}>
+        <Text style={styles.socialEmoji}>❓</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.socialTitulo}>Perguntas frequentes</Text>
+        </View>
+        <Text style={styles.socialArrow}>→</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.social, shadow.card]} onPress={() => navigation.navigate('Blog')}>
+        <Text style={styles.socialEmoji}>📝</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.socialTitulo}>Blog</Text>
+        </View>
+        <Text style={styles.socialArrow}>→</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.social, shadow.card]} onPress={() => navigation.navigate('Contato')}>
+        <Text style={styles.socialEmoji}>✉️</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.socialTitulo}>Fale conosco</Text>
+        </View>
+        <Text style={styles.socialArrow}>→</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.social, shadow.card]} onPress={() => navigation.navigate('Corporativo')}>
+        <Text style={styles.socialEmoji}>🎁</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.socialTitulo}>Presentes Corporativos</Text>
+        </View>
+        <Text style={styles.socialArrow}>→</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.social, shadow.card]} onPress={() => navigation.navigate('EnvioDevolucoes')}>
+        <Text style={styles.socialEmoji}>📦</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.socialTitulo}>Envio e Devoluções</Text>
+        </View>
+        <Text style={styles.socialArrow}>→</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.social, { marginBottom: spacing.xl }, shadow.card]} onPress={() => navigation.navigate('PoliticaReembolso')}>
+        <Text style={styles.socialEmoji}>💳</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.socialTitulo}>Política de Reembolso</Text>
         </View>
         <Text style={styles.socialArrow}>→</Text>
       </TouchableOpacity>
