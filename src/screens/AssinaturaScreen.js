@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  Alert, ActivityIndicator, Linking,
+  Alert, ActivityIndicator,
 } from 'react-native'
 import { colors, spacing, radius, shadow } from '../theme'
 import BotaoDourado from '../components/BotaoDourado'
@@ -64,37 +64,12 @@ export default function AssinaturaScreen({ navigation }) {
     if (!selecionado || !produto) return
     setAssinando(true)
     try {
-      // 1. Adicionar ao carrinho
       await api.post('/carrinho/adicionar', {
         produto_id: produto.id,
         plano_id: selecionado,
         quantidade: 1,
       })
-
-      // 2. Buscar itens do carrinho para obter os IDs
-      const { data: carrinho } = await api.get('/carrinho/')
-      const ids = carrinho.itens.map(i => i.id)
-      if (!ids.length) throw new Error('Carrinho vazio após adicionar.')
-
-      // 3. Finalizar e obter URL do MercadoPago
-      const { data } = await api.post('/carrinho/finalizar', {
-        ids,
-        cupom: null,
-        desconto_cupom: 0,
-      })
-
-      if (data.checkout_url) {
-        await Linking.openURL(data.checkout_url)
-        Alert.alert(
-          'Pagamento iniciado 🥂',
-          'Complete o pagamento no MercadoPago. Sua assinatura será ativada automaticamente assim que confirmado.',
-          [{ text: 'OK' }]
-        )
-      } else {
-        // Modo desenvolvimento — aprovação imediata
-        Alert.alert('Assinatura ativada! 🥂', 'Bem-vindo ao Clube do Gole!')
-        navigation.navigate('Perfil')
-      }
+      navigation.navigate('Carrinho')
     } catch (e) {
       const detail = e?.response?.data?.detail
       const msg = Array.isArray(detail)
@@ -193,7 +168,7 @@ export default function AssinaturaScreen({ navigation }) {
       />
 
       <Text style={styles.rodape}>
-        Você será redirecionado ao MercadoPago para concluir o pagamento com segurança.
+        Você poderá revisar seu pedido e escolher o endereço de entrega antes de pagar.
       </Text>
 
     </ScrollView>

@@ -13,6 +13,9 @@ import AssinaturaScreen from './src/screens/AssinaturaScreen'
 import ComunidadeScreen from './src/screens/ComunidadeScreen'
 import PerfilScreen from './src/screens/PerfilScreen'
 import LoginScreen from './src/screens/LoginScreen'
+import CarrinhoScreen from './src/screens/CarrinhoScreen'
+import CheckoutScreen from './src/screens/CheckoutScreen'
+import EnderecoFormScreen from './src/screens/EnderecoFormScreen'
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -90,6 +93,39 @@ export default function App() {
             options={{
               presentation: 'modal',
               title: 'Entrar',
+              headerStyle: { backgroundColor: colors.fundoSecundario },
+              headerTintColor: colors.dourado,
+              headerShadowVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="Carrinho"
+            component={CarrinhoScreen}
+            options={{
+              title: 'Carrinho',
+              headerStyle: { backgroundColor: colors.fundoSecundario },
+              headerTintColor: colors.dourado,
+              headerTitleStyle: { color: colors.texto },
+              headerShadowVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="Checkout"
+            component={CheckoutScreen}
+            options={{
+              title: 'Finalizar compra',
+              headerStyle: { backgroundColor: colors.fundoSecundario },
+              headerTintColor: colors.dourado,
+              headerTitleStyle: { color: colors.texto },
+              headerShadowVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="EnderecoForm"
+            component={EnderecoFormScreen}
+            options={{
+              presentation: 'modal',
+              title: 'Endereço',
               headerStyle: { backgroundColor: colors.fundoSecundario },
               headerTintColor: colors.dourado,
               headerShadowVisible: false,
