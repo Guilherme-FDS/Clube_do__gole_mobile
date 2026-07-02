@@ -1,11 +1,13 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Text } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { AuthProvider } from './src/context/AuthContext'
 import { colors } from './src/theme'
+import AgeGate from './src/components/AgeGate'
 import HomeScreen from './src/screens/HomeScreen'
 import AssinaturaScreen from './src/screens/AssinaturaScreen'
 import ComunidadeScreen from './src/screens/ComunidadeScreen'
@@ -59,6 +61,23 @@ function Tabs() {
 }
 
 export default function App() {
+  const [idadeVerificada, setIdadeVerificada] = useState(null) // null = carregando
+
+  useEffect(() => {
+    AsyncStorage.getItem('age_verified').then(v => setIdadeVerificada(v === 'true'))
+  }, [])
+
+  if (idadeVerificada === null) return null
+
+  if (!idadeVerificada) {
+    return (
+      <AgeGate onConfirmar={async () => {
+        await AsyncStorage.setItem('age_verified', 'true')
+        setIdadeVerificada(true)
+      }} />
+    )
+  }
+
   return (
     <AuthProvider>
       <NavigationContainer theme={tema}>
