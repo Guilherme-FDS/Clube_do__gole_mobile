@@ -39,7 +39,7 @@ export default function CheckoutScreen({ navigation, route }) {
     setCarregando(true)
     try {
       const [{ data: carrinho }, { data: perfilData }] = await Promise.all([
-        api.get('/carrinho'),
+        api.get('/carrinho/'),
         api.get('/configuracoes/perfil'),
       ])
       setItens((carrinho.itens || []).filter(i => itemIds.includes(i.id)))

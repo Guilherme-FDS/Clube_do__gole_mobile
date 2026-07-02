@@ -21,7 +21,7 @@ export default function CarrinhoScreen({ navigation }) {
   async function carregar() {
     setCarregando(true)
     try {
-      const { data } = await api.get('/carrinho')
+      const { data } = await api.get('/carrinho/')
       setItens(data.itens || [])
       setSelecionados((data.itens || []).map(i => i.id))
     } catch {
