@@ -69,6 +69,11 @@ export default function AssinaturaScreen({ navigation }) {
         plano_id: selecionado,
         quantidade: 1,
       })
+      const { data: carrinho } = await api.get('/carrinho/')
+      if (!carrinho.itens?.length) {
+        Alert.alert('Ops', 'Não foi possível adicionar ao carrinho. Tente novamente.')
+        return
+      }
       navigation.navigate('Carrinho')
     } catch (e) {
       const detail = e?.response?.data?.detail
