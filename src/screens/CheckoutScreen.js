@@ -141,7 +141,10 @@ export default function CheckoutScreen({ navigation, route }) {
       } else {
         Alert.alert('Pedido confirmado! 🥂', 'Seu pedido foi registrado com sucesso.')
       }
-      navigation.navigate('Tabs', { screen: 'Perfil' })
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Tabs', params: { screen: 'Perfil' } }],
+      })
     } catch (e) {
       const detail = e?.response?.data?.detail
       const msg = Array.isArray(detail) ? detail.map(d => d.msg || d).join('\n') : (detail || 'Não foi possível finalizar. Tente novamente.')
