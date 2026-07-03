@@ -5,6 +5,7 @@ import {
 } from 'react-native'
 import { colors, spacing, radius, shadow } from '../theme'
 import BotaoDourado from '../components/BotaoDourado'
+import Campo from '../components/Campo'
 import api from '../services/api'
 import { formatarCEP, buscarCEP } from '../utils/cep'
 
@@ -136,15 +137,6 @@ export default function EnderecoFormScreen({ navigation, route }) {
   )
 }
 
-function Campo({ label, children }) {
-  return (
-    <View style={{ marginBottom: 14 }}>
-      <Text style={styles.label}>{label}</Text>
-      {children}
-    </View>
-  )
-}
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.fundo },
   scroll: { padding: spacing.md, paddingVertical: spacing.lg },
@@ -152,7 +144,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.fundoSecundario, borderRadius: radius.lg,
     borderWidth: 1, borderColor: colors.bordaCard, padding: spacing.lg,
   },
-  label: { color: colors.textoSecundario, fontSize: 12, fontWeight: '600', marginBottom: 6, letterSpacing: 0.3 },
   input: {
     backgroundColor: colors.fundoCard, color: colors.texto, borderRadius: radius.md,
     paddingHorizontal: spacing.md, paddingVertical: 13, fontSize: 15,

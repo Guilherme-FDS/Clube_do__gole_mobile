@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import * as WebBrowser from 'expo-web-browser'
 import * as Linking from 'expo-linking'
 import { colors, gradients, spacing, radius, shadow } from '../theme'
+import Campo from '../components/Campo'
 import { useAuth } from '../context/AuthContext'
 import { validarSenha } from '../utils/validarSenha'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -313,19 +314,6 @@ export default function LoginScreen({ navigation }) {
     </KeyboardAvoidingView>
   )
 }
-
-function Campo({ label, children }) {
-  return (
-    <View style={{ marginBottom: 14 }}>
-      <Text style={campoStyles.label}>{label}</Text>
-      {children}
-    </View>
-  )
-}
-
-const campoStyles = StyleSheet.create({
-  label: { color: colors.textoSecundario, fontSize: 12, fontWeight: '600', marginBottom: 6, letterSpacing: 0.3 },
-})
 
 function BotaoGold({ titulo, onPress, loading }) {
   return (

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { View, Text, TextInput, ScrollView, StyleSheet, TouchableOpacity, Alert, Linking } from 'react-native'
 import { colors, spacing, radius, shadow } from '../theme'
 import BotaoDourado from '../components/BotaoDourado'
+import Campo from '../components/Campo'
 
 const ASSUNTOS = ['Dúvida sobre assinatura', 'Problema com pedido', 'Parceria corporativa', 'Imprensa', 'Outro']
 
@@ -77,15 +78,6 @@ export default function ContatoScreen() {
   )
 }
 
-function Campo({ label, children }) {
-  return (
-    <View style={{ marginBottom: 14 }}>
-      <Text style={styles.label}>{label}</Text>
-      {children}
-    </View>
-  )
-}
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.fundo },
   titulo: { color: colors.texto, fontSize: 26, fontWeight: '700', marginBottom: spacing.md },
@@ -100,7 +92,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.fundoSecundario, borderRadius: radius.lg,
     borderWidth: 1, borderColor: colors.bordaCard, padding: spacing.lg,
   },
-  label: { color: colors.textoSecundario, fontSize: 12, fontWeight: '600', marginBottom: 6, letterSpacing: 0.3 },
   input: {
     backgroundColor: colors.fundoCard, color: colors.texto, borderRadius: radius.md,
     paddingHorizontal: spacing.md, paddingVertical: 13, fontSize: 15,
