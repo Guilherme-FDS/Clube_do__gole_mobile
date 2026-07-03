@@ -28,6 +28,29 @@ Consome o mesmo backend do site: `https://clube-do-gole-backend.onrender.com/api
 
 Endpoints usados: `/auth/login`, `/auth/cadastro`, `/auth/me`, `/produtos/`, `/carrinho/adicionar`, `/assinaturas/minhas`, `/carrinho/meus_pedidos`.
 
+## Testando pagamentos
+
+O checkout do app usa o mesmo backend do site, então para testar pagamentos em modo sandbox, o backend (Render ou local) precisa estar configurado com credenciais de TESTE do Mercado Pago (prefixo `TEST-` em `MP_ACCESS_TOKEN`/`MP_PUBLIC_KEY` — configuração feita no repositório do site, não no app). Com credenciais de teste, o Mercado Pago aceita apenas os dados fictícios abaixo — nenhum cartão, PIX ou boleto real é cobrado.
+
+### Cartões de crédito de teste
+
+| Bandeira | Número | CVV | Validade | Resultado |
+|---|---|---|---|---|
+| Mastercard | 5031 4332 1540 6351 | 123 | 11/30 | Aprovado |
+| Visa | 4235 6477 2802 5682 | 123 | 11/30 | Aprovado |
+| Visa (recusado) | 4013 5406 8274 6260 | 123 | 11/30 | Recusado (fundos insuficientes) |
+
+Nome do titular: `APRO` (aprova automaticamente) ou `OTHE` (recusa) — convenção oficial de sandbox do Mercado Pago.
+CPF de teste: qualquer CPF válido gerado, ou `123.456.789-09`.
+
+### PIX e boleto de teste
+
+No sandbox, o QR code do PIX e o boleto gerados são fictícios. O painel de testes do Mercado Pago (conta de teste "vendedor") permite simular a confirmação do pagamento manualmente.
+
+### Referência oficial
+
+Para números de cartão atualizados, consulte a [documentação oficial de cartões de teste](https://www.mercadopago.com.br/developers/pt/docs/checkout-api/testing).
+
 ## Identidade visual
 
 Mesma paleta do site: fundo escuro `#1b1a19`, dourado `#C9A84C`, detalhes em roxo `#7B2FE0` (ver `src/theme.js`).
