@@ -32,6 +32,16 @@ Endpoints usados: `/auth/login`, `/auth/cadastro`, `/auth/me`, `/produtos/`, `/c
 
 O checkout do app usa o mesmo backend do site, então para testar pagamentos em modo sandbox, o backend (Render ou local) precisa estar configurado com credenciais de TESTE do Mercado Pago (prefixo `TEST-` em `MP_ACCESS_TOKEN`/`MP_PUBLIC_KEY` — configuração feita no repositório do site, não no app). Com credenciais de teste, o Mercado Pago aceita apenas os dados fictícios abaixo — nenhum cartão, PIX ou boleto real é cobrado.
 
+### Conta de teste (comprador)
+
+Na hora de pagar no checkout do Mercado Pago (tela do próprio MP, fora do app), use a conta de teste "comprador" abaixo para logar quando solicitado:
+
+| Papel | Usuário | Senha |
+|---|---|---|
+| Comprador | `TESTUSER6108724104764143400` | `Zw3MoG9dw1` |
+
+(Contas de teste do Mercado Pago são fictícias — não usam dados reais e não movimentam dinheiro real.)
+
 ### Cartões de crédito de teste
 
 | Bandeira | Número | CVV | Validade | Resultado |
