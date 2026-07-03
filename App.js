@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Text } from 'react-native'
+import { Text, Alert } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
@@ -87,7 +87,11 @@ export default function App() {
   if (!idadeVerificada) {
     return (
       <AgeGate onConfirmar={async () => {
-        await AsyncStorage.setItem('age_verified', 'true')
+        try {
+          await AsyncStorage.setItem('age_verified', 'true')
+        } catch (e) {
+          Alert.alert('Erro', 'Não foi possível salvar a confirmação. Tente novamente.')
+        }
         setIdadeVerificada(true)
       }} />
     )

@@ -18,6 +18,9 @@ export default function AgeGate({ onConfirmar }) {
             <Text style={styles.sub}>
               Este aplicativo contém conteúdo sobre bebidas alcoólicas e é destinado apenas a maiores de idade.
             </Text>
+            <TouchableOpacity style={styles.linkVoltar} onPress={() => setRecusado(false)}>
+              <Text style={styles.linkVoltarText}>← Voltar</Text>
+            </TouchableOpacity>
           </>
         ) : (
           <>
@@ -67,4 +70,6 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colors.dourado,
   },
   btnNaoText: { color: colors.dourado, fontWeight: '700', fontSize: 15 },
+  linkVoltar: { marginTop: spacing.lg },
+  linkVoltarText: { color: colors.dourado, fontSize: 12, fontWeight: '600' },
 })
