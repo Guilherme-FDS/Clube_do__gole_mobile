@@ -40,8 +40,8 @@ export default function CarrinhoScreen({ navigation }) {
     if (novaQtd < 1) return
     setAtualizandoId(item.id)
     try {
-      await api.post('/carrinho/quantidade', { item_id: item.id, quantidade: novaQtd })
-      await carregar()
+      const { data } = await api.post('/carrinho/quantidade', { item_id: item.id, quantidade: novaQtd })
+      setItens(prev => prev.map(i => i.id === item.id ? { ...i, quantidade: novaQtd, valor_total: data.novo_total_item } : i))
     } catch {
       Alert.alert('Erro', 'Não foi possível atualizar a quantidade.')
     } finally {
