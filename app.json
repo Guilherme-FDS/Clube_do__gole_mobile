@@ -9,9 +9,11 @@
     "userInterfaceStyle": "dark",
     "backgroundColor": "#1b1a19",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.clubedogole.app"
     },
     "android": {
+      "package": "com.clubedogole.app",
       "adaptiveIcon": {
         "backgroundColor": "#1b1a19",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -25,6 +27,12 @@
     "plugins": [
       "expo-web-browser",
       "@react-native-community/datetimepicker"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "eec71960-544d-4e0e-b58c-54ffa91a7313"
+      }
+    },
+    "owner": "guilhermefds"
   }
 }
