@@ -10,6 +10,7 @@ import BotaoDourado from '../components/BotaoDourado'
 import Campo from '../components/Campo'
 import api from '../services/api'
 import { limitesNascimento, dataParaISO, dataParaBR } from '../utils/datas'
+import { payloadComCpf } from '../utils/perfil'
 
 export default function EditarPerfilScreen({ navigation }) {
   const [carregando, setCarregando] = useState(true)
@@ -58,13 +59,11 @@ export default function EditarPerfilScreen({ navigation }) {
     }
     setSalvando(true)
     try {
-      const payload = {
+      const payloadBase = {
         nome, sobrenome, email, telefone,
         data_nascimento: dataNasc ? dataParaISO(dataNasc) : null,
       }
-      if (!cpfOriginal && cpf) {
-        payload.cpf = cpf.replace(/\D/g, '')
-      }
+      const payload = payloadComCpf(payloadBase, cpfOriginal, cpf ? cpf.replace(/\D/g, '') : cpf)
       const { data } = await api.put('/configuracoes/perfil', payload)
       setCpf(data.cpf || '')
       setCpfOriginal(data.cpf || '')

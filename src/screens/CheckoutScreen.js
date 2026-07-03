@@ -8,6 +8,7 @@ import { colors, spacing, radius, shadow } from '../theme'
 import BotaoDourado from '../components/BotaoDourado'
 import api from '../services/api'
 import { formatarMoeda } from '../utils/format'
+import { payloadComCpf } from '../utils/perfil'
 
 export default function CheckoutScreen({ navigation, route }) {
   const itemIds = route.params?.itemIds ?? []
@@ -63,14 +64,15 @@ export default function CheckoutScreen({ navigation, route }) {
     }
     setSalvandoCpf(true)
     try {
-      const { data } = await api.put('/configuracoes/perfil', {
+      const payloadBase = {
         nome: perfilBase.nome,
         sobrenome: perfilBase.sobrenome,
         email: perfilBase.email,
         telefone: perfilBase.telefone,
         data_nascimento: perfilBase.data_nascimento || null,
-        cpf: digitos,
-      })
+      }
+      const payload = payloadComCpf(payloadBase, cpf, digitos)
+      const { data } = await api.put('/configuracoes/perfil', payload)
       setCpf(data.cpf)
     } catch (e) {
       const detail = e?.response?.data?.detail
