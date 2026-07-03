@@ -2,7 +2,15 @@
 
 Aplicativo mobile do Clube do Gole, feito com **Expo / React Native**. Traz a experiência do clube para o celular com foco em **assinatura** e, principalmente, **comunidade e pertencimento**.
 
-## Como rodar (Expo Go)
+## 📲 Instalar (APK, sem conta/Expo Go)
+
+**Android**: https://expo.dev/accounts/guilhermefds/projects/clube-do-gole/builds/d7ca8f9c-714d-47f3-8599-e91b3e1c0465
+
+> Abrir o link direto no celular Android — baixa o `.apk` automaticamente, sem precisar de login.
+
+---
+
+## Como rodar localmente (dev, opcional)
 
 1. Instale o app **Expo Go** no seu celular (Android/iOS)
 2. No terminal:
